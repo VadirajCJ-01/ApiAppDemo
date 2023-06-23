@@ -28,9 +28,10 @@ namespace ApiAppDemo
 
             app.UseAuthorization();
 
-            app.MapGet("/GetDevices", async (DevicesContext Db) => await Db.Devices.ToListAsync());
-
-            app.MapGet("/GetOnDevices", async (DevicesContext Db) => await Db.Devices.Where(t => t.IsDeviceOn).ToListAsync());
+            app.MapGet("/GetDevices", async (DevicesContext Db) =>
+            {
+                return await Db.Devices.ToListAsync();
+            });
 
             app.MapGet("/GetDevice/{id}", async (int id, DevicesContext Db) =>
             await Db.Devices.FindAsync(id)
@@ -45,33 +46,6 @@ namespace ApiAppDemo
 
                 return Results.Created($"/AddDevices/{device.DeviceID}", device);
             });
-
-            app.MapPut("/ChangeDevice/{id}", async (int id, Device inputTodo, DevicesContext db) =>
-            {
-                var todo = await db.Devices.FindAsync(id);
-
-                if (todo is null) return Results.NotFound();
-
-                todo.DeviceName = inputTodo.DeviceName;
-                todo.IsDeviceOn = inputTodo.IsDeviceOn;
-
-                await db.SaveChangesAsync();
-
-                return Results.NoContent();
-            });
-
-            app.MapDelete("/DeleteDevice/{id}", async (int id, DevicesContext db) =>
-            {
-                if (await db.Devices.FindAsync(id) is Device device)
-                {
-                    db.Devices.Remove(device);
-                    await db.SaveChangesAsync();
-                    return Results.Ok(device);
-                }
-
-                return Results.NotFound();
-            });
-
             app.Run();
         }
     }
